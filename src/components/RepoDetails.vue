@@ -13,7 +13,7 @@
       <p v-if="details.language === null">Main Language: none</p>
       <p v-else>Main Language: {{ details.language }}</p>
       <p v-if="deployments.length === 0">Live site: none</p>
-      <p v-else>Live site: <a :href="`https://Okezedavid.github.io/${details.name}`">Okezedavid.github.io/{{ details.name }}</a></p>
+      <p v-else>Error Page: <a :href="`https://Okezedavid.github.io/${details.name}`">Okezedavid.github.io/{{ details.name }}</a></p>
       <p><a :href="`https://github.com/${details.full_name}`" target="_blank">View on Github</a></p>
       <button class="home-button" @click="goHome">Home Page</button>
     </div>

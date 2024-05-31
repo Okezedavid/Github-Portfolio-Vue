@@ -15,8 +15,8 @@
       <p v-if="deployments.length === 0">Live site: none</p>
       <p v-else>Error Page: <a :href="`https://Okezedavid.github.io/${details.name}`">Okezedavid.github.io/{{ details.name }}</a></p>
       <p><a :href="`https://github.com/${details.full_name}`" target="_blank">View on Github</a></p>
-      <button class="home-button" @click="goHome">Home Page</button>
     </div>
+    <button class="home-button" @click="goHome">Home Page</button>
   </div>
 </template>
 
@@ -95,6 +95,19 @@ export default {
   padding: 15px;
   border-radius: 15px;
   box-shadow: #7c8db5;
+}
+
+.repodetail-card {
+  background-color: #2e3333;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.repodetail-card:hover {
+  transform: rotate(1deg);
+  box-shadow: 0 0 10px #9ddfe8;
+}
+
+.repo-mini-details p {
+  /* color: #f5f1e3; */
 }
 
 .repo-name {

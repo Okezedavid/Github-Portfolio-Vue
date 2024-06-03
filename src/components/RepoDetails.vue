@@ -106,9 +106,7 @@ export default {
   box-shadow: 0 0 10px #9ddfe8;
 }
 
-.repo-mini-details p {
-  /* color: #f5f1e3; */
-}
+
 
 .repo-name {
   color: #0e5f76;

@@ -1,84 +1,84 @@
 <script setup>
-  import PrevIcon from './icons/prevIcon.vue';
-  import NextIcon from './icons/nextIcon.vue';
-  import Skeleton from './Skeleton.vue';
+import PrevIcon from './icons/prevIcon.vue';
+import NextIcon from './icons/nextIcon.vue';
+import Skeleton from './Skeleton.vue';
 </script>
 
 <script>
-  export default {
-    data() {
-      return {
-        repoData: [],
-        currentPage: 1,
-        loading: false,
-        perPage: 6,
-        skeleton: [...new Array(6)],
-        selectedLanguage: '', // Add selectedLanguage state to store the selected language filter
-        searchTerm: '', // Add searchTerm state to store the search term
-      };
-    },
-    methods: {
-      fetchData() {
-        this.loading = true;
-        fetch(`https://api.github.com/users/Okezedavid/repos`, {
-          headers: {
-            Accept: "application/json"
-          },
-        })
+export default {
+  data() {
+    return {
+      repoData: [],
+      currentPage: 1,
+      loading: false,
+      perPage: 6,
+      skeleton: [...new Array(6)],
+      selectedLanguage: '', // Add selectedLanguage state to store the selected language filter
+      searchTerm: '', // Add searchTerm state to store the search term
+    };
+  },
+  methods: {
+    fetchData() {
+      this.loading = true;
+      fetch(`https://api.github.com/users/Okezedavid/repos`, {
+        headers: {
+          Accept: "application/json"
+        },
+      })
         .then((res) => res.json())
         .then((data) => {
           this.repoData = data;
           this.loading = false;
         });
-      },
-      prevPage() {
-        if (this.currentPage > 1) {
-          this.currentPage--;
-        }
-      },
-      nextPage() {
-        if (this.currentPage < this.lastPage) {
-          this.currentPage++;
-        }
-      },
-      handleLanguageFilter(language) {
-        this.selectedLanguage = language; // Update selectedLanguage state with the selected language
-        this.currentPage = 1; // Reset currentPage to 1 when a new filter is applied
-      },
     },
-    mounted() {
-      this.fetchData();
-    },
-    computed: {
-      showMore() {
-        const start = (this.currentPage - 1) * this.perPage;
-        const end = start + this.perPage;
-        this.loading = false;
-        return this.repoData.filter(repo => {
-          // Filter repos based on selectedLanguage if it's not empty
-          if (this.selectedLanguage && repo.language !== this.selectedLanguage) {
-            return false; // Skip if language doesn't match
-          }
-          // Filter repos based on searchTerm if it's not empty
-          if (this.searchTerm && !repo.name.toLowerCase().includes(this.searchTerm.toLowerCase())) {
-            return false; // Skip if name doesn't match
-          }
-          return true; // If no language selected or name matched, include the repo
-        }).slice(start, end);
-      },
-      lastPage() {
-        return Math.ceil(this.repoData.length / this.perPage);
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
       }
+    },
+    nextPage() {
+      if (this.currentPage < this.lastPage) {
+        this.currentPage++;
+      }
+    },
+    handleLanguageFilter(language) {
+      this.selectedLanguage = language; // Update selectedLanguage state with the selected language
+      this.currentPage = 1; // Reset currentPage to 1 when a new filter is applied
+    },
+  },
+  mounted() {
+    this.fetchData();
+  },
+  computed: {
+    showMore() {
+      const start = (this.currentPage - 1) * this.perPage;
+      const end = start + this.perPage;
+      this.loading = false;
+      return this.repoData.filter(repo => {
+        // Filter repos based on selectedLanguage if it's not empty
+        if (this.selectedLanguage && repo.language !== this.selectedLanguage) {
+          return false; // Skip if language doesn't match
+        }
+        // Filter repos based on searchTerm if it's not empty
+        if (this.searchTerm && !repo.name.toLowerCase().includes(this.searchTerm.toLowerCase())) {
+          return false; // Skip if name doesn't match
+        }
+        return true; // If no language selected or name matched, include the repo
+      }).slice(start, end);
+    },
+    lastPage() {
+      return Math.ceil(this.repoData.length / this.perPage);
     }
   }
+}
 </script>
 
 <template>
-      <div className="welcomeMessage">
-        <h2>
-          Heyy!👋 <span className="welcome">Welcome</span>
-        </h2>
-      </div>
+  <div className="welcomeMessage">
+    <h2>
+      Heyy!👋 <span className="welcome">Welcome</span>
+    </h2>
+  </div>
   <div>
     <!-- Your existing code -->
     <div class="main-inputs">
@@ -92,44 +92,52 @@
         <!-- Add more options for other languages -->
       </select>
 
-        </div>
-        <div class="repoTitle">
-        <h1>My Repositories</h1>
-      </div>
-        <div class="repo-container"> 
-            <Skeleton v-if="loading" v-for="n in skeleton">{{ skeleton }}</Skeleton>  
-            <div v-else v-for="repo in showMore" class="repo-card" :key="repo.id">
-                <router-link :to="`/details/${repo.name}`"><h2 class="repo-name">{{ repo.name }}</h2></router-link>
-                <p class="language">Langauge: {{ repo.language }}</p>
-                <p class="date">Start date & time: {{ repo.created_at }}</p>
-                <p class="visibility">Visibility: {{ repo.visibility }}</p>
-            </div>
-           
-        </div>
-        <div class="pagination">
-            <button class="view-more" :class="currentPage === 1 ? 'disabled' : '' " @click="prevPage"><PrevIcon /></button>
-            <p class="current-page">{{ currentPage }}</p>
-            <button class="view-more" :class="currentPage === lastPage ? 'disabled' : '' " @click="nextPage"><NextIcon /></button>
-        </div>
     </div>
+    <div class="repoTitle">
+      <h1>My Repositories</h1>
+    </div>
+    <div class="repo-container">
+      <Skeleton v-if="loading" v-for="n in skeleton">{{ skeleton }}</Skeleton>
+      <div v-else v-for="repo in showMore" class="repo-card" :key="repo.id">
+        <router-link :to="`/details/${repo.name}`">
+          <h2 class="repo-name">{{ repo.name }}</h2>
+        </router-link>
+        <p class="language">Language: {{ repo.language }}</p>
+        <p class="date">Start date & time: {{ repo.created_at }}</p>
+        <p class="visibility">Visibility: {{ repo.visibility }}</p>
+      </div>
+
+    </div>
+    <div class="pagination">
+      <button class="view-more" :class="currentPage === 1 ? 'disabled' : ''" @click="prevPage">
+        <PrevIcon />
+      </button>
+      <p class="current-page">{{ currentPage }}</p>
+      <button class="view-more" :class="currentPage === lastPage ? 'disabled' : ''" @click="nextPage">
+        <NextIcon />
+      </button>
+    </div>
+  </div>
   <footer class="foot">
-  
+
     <div class="social-links">
       <a href="https://twitter.com/@DavidOkeze" target="_blank" rel="noopener noreferrer">
-  <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-    <path d="M24 4.56c-.89.39-1.84.66-2.84.78a4.92 4.92 0 002.16-2.72 9.84 9.84 0 01-3.1 1.18 4.92 4.92 0 00-8.38 4.48A13.93 13.93 0 011.67 3.15 4.93 4.93 0 003.18 9.72a4.91 4.91 0 01-2.23-.62v.06a4.93 4.93 0 003.95 4.83 4.92 4.92 0 01-2.22.08 4.93 4.93 0 004.59 3.42A9.87 9.87 0 010 21.54a13.91 13.91 0 007.55 2.21c9.06 0 14.01-7.5 14.01-14 0-.21 0-.43-.02-.64a10.01 10.01 0 002.47-2.54z"/>
-  </svg>
-</a>
+        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path
+            d="M24 4.56c-.89.39-1.84.66-2.84.78a4.92 4.92 0 002.16-2.72 9.84 9.84 0 01-3.1 1.18 4.92 4.92 0 00-8.38 4.48A13.93 13.93 0 011.67 3.15 4.93 4.93 0 003.18 9.72a4.91 4.91 0 01-2.23-.62v.06a4.93 4.93 0 003.95 4.83 4.92 4.92 0 01-2.22.08 4.93 4.93 0 004.59 3.42A9.87 9.87 0 010 21.54a13.91 13.91 0 007.55 2.21c9.06 0 14.01-7.5 14.01-14 0-.21 0-.43-.02-.64a10.01 10.01 0 002.47-2.54z" />
+        </svg>
+      </a>
 
       <a href="https://linkedin.com/in/david-ugochukwu-7172672b1" target="_blank" rel="noopener noreferrer">
-  <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-    <path d="M22.23 0H1.77A1.76 1.76 0 000 1.76v20.48A1.76 1.76 0 001.77 24h20.48A1.76 1.76 0 0024 22.24V1.76A1.76 1.76 0 0022.23 0zM7.12 20.45H3.54V9h3.58v11.45zM5.33 7.62a2.07 2.07 0 01-2.1-2.08 2.08 2.08 0 112.1 2.08zm14.72 12.83h-3.58v-5.5c0-1.31-.02-3-1.82-3s-2.1 1.42-2.1 2.91v5.59H9.97V9h3.43v1.56h.05a3.77 3.77 0 013.39-1.87c3.62 0 4.29 2.38 4.29 5.47v6.29z"/>
-  </svg>
-</a>
+        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path
+            d="M22.23 0H1.77A1.76 1.76 0 000 1.76v20.48A1.76 1.76 0 001.77 24h20.48A1.76 1.76 0 0024 22.24V1.76A1.76 1.76 0 0022.23 0zM7.12 20.45H3.54V9h3.58v11.45zM5.33 7.62a2.07 2.07 0 01-2.1-2.08 2.08 2.08 0 112.1 2.08zm14.72 12.83h-3.58v-5.5c0-1.31-.02-3-1.82-3s-2.1 1.42-2.1 2.91v5.59H9.97V9h3.43v1.56h.05a3.77 3.77 0 013.39-1.87c3.62 0 4.29 2.38 4.29 5.47v6.29z" />
+        </svg>
+      </a>
     </div>
     <p>© 2024 David's Portfolio</p>
   </footer>
-            
+
 </template>
 
 
@@ -145,7 +153,7 @@
   width: 20px;
   height: 20px;
   fill: #eee8d3;
- /* fill: currentColor; */
+  /* fill: currentColor; */
 }
 
 
@@ -159,7 +167,8 @@
   font-family: "Major Mono Display", monospace;
   overflow: hidden;
   white-space: nowrap;
-  animation: typewriter 5s steps(40) forwards; /* Apply typewriter animation */
+  animation: typewriter 5s steps(40) forwards;
+  /* Apply typewriter animation */
 }
 
 .welcome {
@@ -169,10 +178,13 @@
 /* Animation for typewriter effect */
 @keyframes typewriter {
   from {
-    width: 0; /* Start with no width */
+    width: 0;
+    /* Start with no width */
   }
+
   to {
-    width: 100%; /* Increase width to full length */
+    width: 100%;
+    /* Increase width to full length */
   }
 }
 
@@ -193,8 +205,10 @@
 }
 
 input:focus {
-  outline: none; /* Remove the default outline */
-  box-shadow: 0 0 5px 2px #9ddfe8; /* Blue shadow */
+  outline: none;
+  /* Remove the default outline */
+  box-shadow: 0 0 5px 2px #9ddfe8;
+  /* Blue shadow */
 }
 
 .select-btn {
@@ -235,20 +249,22 @@ input:focus {
   /* animation: typewriter 3s steps(40), fadeOut 1s 3s forwards; Apply both animations */
 }
 
-.language,.date,.visibility {
-    color: #8ba1d6;
+.language,
+.date,
+.visibility {
+  color: #8ba1d6;
   /* font-weight: 510; */
   font: 20px;
   font-family: "Major Mono Display", monospace;
 }
 
 .repo-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
-    grid-gap: 30px;
-    width: 90%;
-    margin: 0 auto;
-    margin-bottom: 5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-gap: 30px;
+  width: 90%;
+  margin: 0 auto;
+  margin-bottom: 5rem;
 }
 
 
@@ -257,6 +273,7 @@ input:focus {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -265,7 +282,7 @@ input:focus {
 
 .repo-card {
   animation: fadeIn 1.5s ease-out forwards;
-  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 
 }
 
@@ -280,8 +297,7 @@ input:focus {
 
 
 .repo-card:hover {
-  transform: rotate(5deg);
-
+  transform: rotate(1deg);
   box-shadow: 0 0 10px #9ddfe8;
 }
 
@@ -301,30 +317,30 @@ a:hover {
 }
 
 p {
-    padding: 5px 0;
+  padding: 5px 0;
 }
 
 .pagination {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    margin: 3rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 3rem 0;
 }
 
 button {
-    background: none;
-    border: none;
-    cursor: pointer;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .view-more svg {
-    width: 2rem;
+  width: 2rem;
 }
 
 .disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .foot {
@@ -345,7 +361,7 @@ button {
   .repo-name {
     font-size: 20px;
   }
-  
+
 
   h1 {
     font-size: 1.5rem;
@@ -354,10 +370,10 @@ button {
   .github-icon {
     font-size: 2rem;
   }
+
   /* .input {
     width: 60%;
     margin-left: 20px;
   } */
 }
-
 </style>

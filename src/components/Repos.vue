@@ -13,8 +13,9 @@ export default {
       loading: false,
       perPage: 6,
       skeleton: [...new Array(6)],
-      selectedLanguage: '', // Add selectedLanguage state to store the selected language filter
-      searchTerm: '', // Add searchTerm state to store the search term
+      selectedLanguage: '',
+      searchTerm: '',
+      manageRepoId: null, // Track which repo's manage options are visible
     };
   },
   methods: {
@@ -42,9 +43,20 @@ export default {
       }
     },
     handleLanguageFilter(language) {
-      this.selectedLanguage = language; // Update selectedLanguage state with the selected language
-      this.currentPage = 1; // Reset currentPage to 1 when a new filter is applied
+      this.selectedLanguage = language;
+      this.currentPage = 1;
     },
+    toggleManageOptions(repoId) {
+      this.manageRepoId = this.manageRepoId === repoId ? null : repoId;
+    },
+    handleCancel() {
+      this.manageRepoId = null;
+    },
+    handleDelete(repoId) {
+      // Logic to handle delete (e.g., API call to delete repo)
+      console.log(`Deleting repo with ID: ${repoId}`);
+      this.manageRepoId = null;
+    }
   },
   mounted() {
     this.fetchData();
@@ -53,17 +65,14 @@ export default {
     showMore() {
       const start = (this.currentPage - 1) * this.perPage;
       const end = start + this.perPage;
-      this.loading = false;
       return this.repoData.filter(repo => {
-        // Filter repos based on selectedLanguage if it's not empty
         if (this.selectedLanguage && repo.language !== this.selectedLanguage) {
-          return false; // Skip if language doesn't match
+          return false;
         }
-        // Filter repos based on searchTerm if it's not empty
         if (this.searchTerm && !repo.name.toLowerCase().includes(this.searchTerm.toLowerCase())) {
-          return false; // Skip if name doesn't match
+          return false;
         }
-        return true; // If no language selected or name matched, include the repo
+        return true;
       }).slice(start, end);
     },
     lastPage() {
@@ -74,30 +83,27 @@ export default {
 </script>
 
 <template>
-  <div className="welcomeMessage">
+  <div class="welcomeMessage">
     <h2>
-      Heyy!👋 <span className="welcome">Welcome</span>
+      Heyy!👋 <span class="welcome">Welcome</span>
     </h2>
   </div>
   <div>
-    <!-- Your existing code -->
     <div class="main-inputs">
-      <!-- Your input and select elements -->
-      <input class="input" type="text" placeholder="Search repos here..." v-model="searchTerm">
+      <input class="search-input" type="text" placeholder="Search repos here..." v-model="searchTerm">
+      <i class="fas fa-search"></i>
       <select class="select-btn" v-model="selectedLanguage" @change="handleLanguageFilter(selectedLanguage)">
         <option value="">Filter</option>
         <option value="HTML">HTML</option>
         <option value="CSS">CSS</option>
         <option value="JavaScript">JavaScript</option>
-        <!-- Add more options for other languages -->
       </select>
-
     </div>
     <div class="repoTitle">
       <h1>My Repositories</h1>
     </div>
     <div class="repo-container">
-      <Skeleton v-if="loading" v-for="n in skeleton">{{ skeleton }}</Skeleton>
+      <Skeleton v-if="loading" v-for="n in skeleton" :key="n">{{ skeleton }}</Skeleton>
       <div v-else v-for="repo in showMore" class="repo-card" :key="repo.id">
         <router-link :to="`/details/${repo.name}`">
           <h2 class="repo-name">{{ repo.name }}</h2>
@@ -105,8 +111,14 @@ export default {
         <p class="language">Language: {{ repo.language }}</p>
         <p class="date">Start date & time: {{ repo.created_at }}</p>
         <p class="visibility">Visibility: {{ repo.visibility }}</p>
+        <!-- <div class="manage-btn">
+          <button @click="toggleManageOptions(repo.id)">Manage</button>
+          <div v-if="manageRepoId === repo.id" class="manage-options">
+            <button @click="handleDelete(repo.id)">Delete</button>
+            <button @click="handleCancel(repo.id)">Cancel</button>
+          </div>
+        </div> -->
       </div>
-
     </div>
     <div class="pagination">
       <button class="view-more" :class="currentPage === 1 ? 'disabled' : ''" @click="prevPage">
@@ -119,29 +131,47 @@ export default {
     </div>
   </div>
   <footer class="foot">
-
     <div class="social-links">
       <a href="https://twitter.com/@DavidOkeze" target="_blank" rel="noopener noreferrer">
         <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path
-            d="M24 4.56c-.89.39-1.84.66-2.84.78a4.92 4.92 0 002.16-2.72 9.84 9.84 0 01-3.1 1.18 4.92 4.92 0 00-8.38 4.48A13.93 13.93 0 011.67 3.15 4.93 4.93 0 003.18 9.72a4.91 4.91 0 01-2.23-.62v.06a4.93 4.93 0 003.95 4.83 4.92 4.92 0 01-2.22.08 4.93 4.93 0 004.59 3.42A9.87 9.87 0 010 21.54a13.91 13.91 0 007.55 2.21c9.06 0 14.01-7.5 14.01-14 0-.21 0-.43-.02-.64a10.01 10.01 0 002.47-2.54z" />
+          <path d="M24 4.56c-.89.39-1.84.66-2.84.78a4.92 4.92 0 002.16-2.72 9.84 9.84 0 01-3.1 1.18 4.92 4.92 0 00-8.38 4.48A13.93 13.93 0 011.67 3.15 4.93 4.93 0 003.18 9.72a4.91 4.91 0 01-2.23-.62v.06a4.93 4.93 0 003.95 4.83 4.92 4.92 0 01-2.22.08 4.93 4.93 0 004.59 3.42A9.87 9.87 0 010 21.54a13.91 13.91 0 007.55 2.21c9.06 0 14.01-7.5 14.01-14 0-.21 0-.43-.02-.64a10.01 10.01 0 002.47-2.54z" />
         </svg>
       </a>
-
       <a href="https://linkedin.com/in/david-ugochukwu-7172672b1" target="_blank" rel="noopener noreferrer">
         <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path
-            d="M22.23 0H1.77A1.76 1.76 0 000 1.76v20.48A1.76 1.76 0 001.77 24h20.48A1.76 1.76 0 0024 22.24V1.76A1.76 1.76 0 0022.23 0zM7.12 20.45H3.54V9h3.58v11.45zM5.33 7.62a2.07 2.07 0 01-2.1-2.08 2.08 2.08 0 112.1 2.08zm14.72 12.83h-3.58v-5.5c0-1.31-.02-3-1.82-3s-2.1 1.42-2.1 2.91v5.59H9.97V9h3.43v1.56h.05a3.77 3.77 0 013.39-1.87c3.62 0 4.29 2.38 4.29 5.47v6.29z" />
+          <path d="M22.23 0H1.77A1.76 1.76 0 000 1.76v20.48A1.76 1.76 0 001.77 24h20.48A1.76 1.76 0 0024 22.24V1.76A1.76 1.76 0 0022.23 0zM7.12 20.45H3.54V9h3.58v11.45zM5.33 7.62a2.07 2.07 0 01-2.1-2.08 2.08 2.08 0 112.1 2.08zm14.72 12.83h-3.58v-5.5c0-1.31-.02-3-1.82-3s-2.1 1.42-2.1 2.91v5.59H9.97V9h3.43v1.56h.05a3.77 3.77 0 013.39-1.87c3.62 0 4.29 2.38 4.29 5.47v6.29z" />
         </svg>
       </a>
     </div>
     <p>© 2024 David's Portfolio</p>
   </footer>
-
 </template>
 
-
 <style>
+
+.manage-btn {
+  display: flex;
+  justify-content: center;
+  /* margin-top: 10px; */
+  width: 100%;
+  height: 40px;
+  background-color: #166771;
+  border-radius: 10px;
+  margin-top: 10px;
+  /* position: relative;
+  bottom: 0; */
+  align-self: end;
+}
+
+.manage-btn button {
+  color: #cbc8c8;
+  font-size: 16px;
+}
+
+.manage-btn:hover {
+  background-color: #187581;
+}
+
 .social-links {
   display: flex;
   justify-content: center;
@@ -189,7 +219,9 @@ export default {
 }
 
 
-.input {
+
+
+.search-input {
   width: 50%;
   font-size: 15px;
   height: 30px;
@@ -204,7 +236,17 @@ export default {
   margin-left: 8%;
 }
 
-input:focus {
+i  {
+  color: #adb8d3;
+  font-size: 15px;
+  margin-left: -22px;
+  margin-top: 5px;
+  position: relative;
+  z-index: 2;
+}
+
+
+.search-input:focus {
   outline: none;
   /* Remove the default outline */
   box-shadow: 0 0 5px 2px #9ddfe8;
@@ -223,7 +265,7 @@ input:focus {
   color: #191c23;
   background-color: #1b9aaa;
   font-weight: 760;
-  margin-left: 10px;
+  margin-left: 20px;
 }
 
 .select option {
@@ -260,7 +302,7 @@ input:focus {
 
 .repo-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  /* grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); */
   grid-gap: 30px;
   width: 90%;
   margin: 0 auto;
@@ -292,6 +334,7 @@ input:focus {
   padding: 15px;
   border-radius: 15px;
   box-shadow: #7c8db5;
+ 
 }
 
 
@@ -352,6 +395,24 @@ button {
   width: 100%;
   font-size: 15px;
 }
+
+
+.manage-options {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #716b6b;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  z-index: 1;
+  width: 100px;
+  /* Hide the manage options by default */
+  display: none;
+}
+
+
 
 @media screen and (max-width: 480px) {
   .repo-container {
